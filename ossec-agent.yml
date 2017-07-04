@@ -1,0 +1,48 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  vars:
+    ossec_server: 10.11.3.76
+  tasks:
+  - name: Copy inotify-tools-3.13-2.el7.art.x86_64 rpm file to server
+    copy:
+      src: packages/inotify-tools-3.13-2.el7.art.x86_64.rpm
+      dest: /tmp/inotify-tools-3.13-2.el7.art.x86_64.rpm
+  - name: Copy ossec-hids-2.9.1-1764.el7.art.x86_64 rpm file to server
+    copy:
+      src: packages/ossec-hids-2.9.1-1764.el7.art.x86_64.rpm
+      dest: /tmp/ossec-hids-2.9.1-1764.el7.art.x86_64.rpm
+  - name: Copy ossec-hids-agent-2.9.1-1764.el7.art.x86_64 rpm file to server
+    copy:
+      src: packages/ossec-hids-agent-2.9.1-1764.el7.art.x86_64.rpm
+      dest: /tmp/ossec-hids-agent-2.9.1-1764.el7.art.x86_64.rpm
+  - name: install OSSEC Agent
+    yum:
+      name: /tmp/{{item}}
+      state: present
+    with_items:
+     - inotify-tools-3.13-2.el7.art.x86_64.rpm
+     - ossec-hids-2.9.1-1764.el7.art.x86_64.rpm
+     - ossec-hids-agent-2.9.1-1764.el7.art.x86_64.rpm
+  - name: Copy ossec-agent.target file to server
+    copy:
+      src: systemd/{{item}}
+      dest: /lib/systemd/system/{{item}}
+    with_items:
+     - ossec-agent.target
+     - ossec-agentd.service
+     - ossec-execd.service
+     - ossec-logcollector.service
+     - ossec-syscheckd.service
+  - name: write the ossec-agent config file
+    template:
+      src: configs/ossec-agent.j2
+      dest: /var/ossec/etc/ossec-agent.conf
+  - name: Run the command for regis to OSSEC server
+    command: /var/ossec/bin/agent-auth -m {{ossec_server}} -p 1515
+  - name: ensure OSSEC Agent is running
+    service:
+      name: ossec-agentd
+      state: started
