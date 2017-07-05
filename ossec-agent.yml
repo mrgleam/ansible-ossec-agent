@@ -49,6 +49,7 @@
     service:
       name: ossec-agentd
       state: started
+      enabled: yes
   handlers:
     - name: restart ossec-agentd
       service:
