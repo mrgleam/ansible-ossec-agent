@@ -25,7 +25,7 @@
       - "{{ package_inotify_tools }}"
       - "{{ package_ossec_hids }}"
       - "{{ package_ossec_hids_agent }}"
-  - name: Copy ossec-agent.target file to server
+  - name: Copy systemd services file to server
     copy:
       src: systemd/{{item}}
       dest: /lib/systemd/system/{{item}}
