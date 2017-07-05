@@ -45,6 +45,8 @@
 [ossim-server]
 192.168.33.10
 
-[other-server]
+[clamav-repo]
 192.168.33.13
+
+[other-server]
 192.168.33.14
